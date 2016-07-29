@@ -420,6 +420,8 @@ test('/account/devices/notify', function (t) {
     }
   }
   var accountRoutes = makeRoutes({
+    // NOTE: add a `sinon.spy` on the customs object. http://sinonjs.org/docs/
+    // Side-note: let's test the endpoint via curl with a customs server that has limit 5 of attempts.
     config: config,
     push: mockPush
   }, {
@@ -452,6 +454,7 @@ test('/account/devices/notify', function (t) {
       payload: pushPayload
     }
     return runTest(route, mockRequest, function (response) {
+      // NOTE: we need a check here that `mockCustoms.checkAuthenticated.callCount, '1',...)
       t.equal(mockPush.pushToAllDevices.callCount, 1, 'mockPush.pushToAllDevices was called once')
       var args = mockPush.pushToAllDevices.args[0]
       t.equal(args.length, 3, 'mockPush.pushToAllDevices was passed three arguments')
@@ -472,6 +475,7 @@ test('/account/devices/notify', function (t) {
       payload: pushPayload
     }
     return runTest(route, mockRequest, function (response) {
+      // NOTE: we need a check here that `mockCustoms.checkAuthenticated.callCount, '1',...)
       t.equal(mockPush.pushToDevices.callCount, 1, 'mockPush.pushToDevices was called once')
       var args = mockPush.pushToDevices.args[0]
       t.equal(args.length, 4, 'mockPush.pushToDevices was passed four arguments')
@@ -501,6 +505,13 @@ test('/account/devices/notify', function (t) {
       t.equal(err.output.statusCode, 503, 'correct status code is returned')
       t.equal(err.errno, error.ERRNO.FEATURE_NOT_ENABLED, 'correct errno is returned')
     })
+  })
+
+  // NOTE: fxa-auth-server needs to be stopped for tests to pass
+  //
+  t.test('throws error if customs blocked the request', function (t) {
+  // NOTE: use a `mockCustoms` object, might have to call `makeRoutes` to get a mocked customs
+
   })
 })
 
